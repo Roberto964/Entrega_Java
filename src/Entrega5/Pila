@@ -1,0 +1,59 @@
+package Entrega2;
+
+public class Pila<E> extends AgregadoLineal<E> {
+	@Override
+	public void add(E e) {
+		elementos.add(e);
+	}
+
+	public E top() {
+		if (elementos.isEmpty()) {
+			throw new IllegalStateException();
+		}
+		return elementos.get(elementos.size() - 1);
+	}
+
+	public static void main(String[] args) {
+		Pila<Double> pila = new Pila<>();
+
+		
+		System.out.println("Añadiendo elementos: 1.1, 2.2, 3.3");
+		pila.add(1.1);
+		pila.add(2.2);
+		pila.add(3.3);
+		System.out.println("Elementos en la pila: " + pila.elementos);
+		System.out.println("Tamaño de la pila: " + pila.elementos.size());
+		System.out.println("Elemento en el tope: " + pila.top());
+
+		System.out.println("\nDesapilando elementos:");
+
+		System.out.println("Desapilado: " + pila.remove());
+		System.out.println("Pila restante: " + pila.elementos);
+
+		System.out.println("Desapilado: " + pila.remove());
+		System.out.println("Pila restante: " + pila.elementos);
+
+		System.out.println("Desapilado: " + pila.remove());
+		System.out.println("Pila restante: " + pila.elementos);
+
+		System.out.println("\n¿Está vacía? " + pila.elementos.isEmpty());
+
+		try {
+			System.out.println("\nIntentando acceder al tope de una pila vacía...");
+			pila.top();
+		} catch (IllegalStateException e) {
+			System.out.println(
+					"Excepción correctamente lanzada al intentar acceder al tope de una pila vacía: La pila está vacía.");
+		}
+
+		try {
+			System.out.println("\nIntentando desapilar en una pila vacía...");
+			pila.remove();
+		} catch (IllegalStateException e) {
+			System.out.println(
+					"Excepción correctamente lanzada al intentar desapilar en una pila vacía: La pila está vacía.");
+		}
+
+	}
+
+}

@@ -1,0 +1,37 @@
+package Entrega2;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class ClientesPorAntiguedad extends ListaOrdenada<Cliente> {
+
+	public ClientesPorAntiguedad(Comparator<Cliente> comparator) {
+		super(comparator);
+		// TODO Auto-generated constructor stub
+	}
+
+	public List<Cliente> topClientes(int n) {
+		List<Cliente> top = new ArrayList<>();
+		for (int i = 0; i < n && i < size(); i++) {
+			top.add(elementos.get(i));
+		}
+		return top;
+	}
+
+	public static void main(String[] args) {
+		Comparator<Cliente> comparadorPorAntiguedad = Comparator.comparingInt(Cliente::getAntiguedad);
+		ClientesPorAntiguedad lista = new ClientesPorAntiguedad(comparator);
+		lista.add(new Cliente("Ana", 5));
+		lista.add(new Cliente("Luis", 10));
+		lista.add(new Cliente("Marta", 3));
+		lista.add(new Cliente("Carlos", 7));
+
+		List<Cliente> top = lista.topClientes(3);
+		System.out.println("Top 3 clientes por antigüedad:");
+		for (Cliente c : top) {
+			System.out.println(c);
+
+		}
+	}
+}

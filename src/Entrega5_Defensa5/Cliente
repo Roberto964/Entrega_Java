@@ -1,0 +1,58 @@
+package Entrega2;
+
+import java.util.Objects;
+
+public final class Cliente {
+	private final String nombre;
+	private final int antiguedad;
+
+	public Cliente(String nombre, int antiguedad) {
+	        this.nombre = nombre;
+	        this.antiguedad = antiguedad;
+	    }
+
+	@Override
+	public String toString() {
+		return "Cliente [nombre=" + nombre + ", antiguedad=" + antiguedad + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(antiguedad, nombre);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Cliente other = (Cliente) obj;
+		return antiguedad == other.antiguedad && Objects.equals(nombre, other.nombre);
+	}
+
+	public static Cliente of(String nombre, int antiguedad) {
+		return new Cliente(nombre, antiguedad);
+	}
+
+	public String getNombre() {
+		return nombre;
+	}
+
+	public int getAntiguedad() {
+		return antiguedad;
+	}
+
+	
+
+	
+
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

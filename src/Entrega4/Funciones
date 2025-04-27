@@ -1,0 +1,93 @@
+package entrega4;
+
+public class Funciones {
+	public static int Calcula_un_producto(int n, int k) {
+		assert n>k :"debe ser la n mayor que la k";
+		int resultados = 1;
+		for( int i=0; i<k;i++){
+			 resultados *= n-i+1;
+			}
+		return resultados;
+		
+	}
+	public static int Producto_de_una_secuencia_geométrica(int a1, int r, int k) {
+		int producto = 1;
+		for(int n=1 ; n<=k; n++) { 
+			double an = a1 * Math.pow(r, n-1);
+			 producto *= an;
+		}
+		return producto;
+	}
+/*
+ * Ahora voy a definir una función auxiliar para que me ayude a calcular e factorial de un numero y 
+ * me sirva para ejercicios futuros
+ */
+	public static int factorial(int n){
+		int producto =1;
+		for(int i=2; i<=n; i++) {
+			producto*=i;
+		}
+		return producto;
+		
+	}
+		
+	public static double Cálculo_del_número_combinatorio(int n, int k) {
+		assert n >= k :"la n debe ser mayor a k";
+		double calculo = factorial(n)/(factorial(k)*factorial(n-k));
+		return calculo;
+		
+		
+	}
+	public static double Número_de_Stirling_de_segunda_especie(int n,int k) {
+		assert n >= k:"n debe ser mayor que k";
+		double sumando = 0.;
+		double primera_parte = 1./(factorial(k));
+		for(int i=0; i<=k; i++) {
+			double calculo_de_combinacion = factorial(k+1)/(factorial(i+1)*factorial(k-i));
+			double parte_de_dentro = Math.pow(-1., i)*calculo_de_combinacion*Math.pow(k-i, n);
+			sumando+=parte_de_dentro;
+		}
+
+
+		return  sumando*primera_parte;
+	}
+
+	public static float Método_de_Newton_para_encontrar_raíces(java.util.function.Function<Float, Float> f,
+			java.util.function.Function<Float, Float> fPrima, float a, float epsilon) {
+		float xn = a;
+		int iteraciones = 0;
+		int maxIter = 1000;
+
+		while (Math.abs(f.apply(xn)) > epsilon && iteraciones < maxIter) {
+			float derivada = fPrima.apply(xn);
+
+			if (derivada == 0) {
+				throw new ArithmeticException("Derivada cero. El método de Newton no puede continuar.");
+			}
+
+			xn = xn - f.apply(xn) / derivada;
+			iteraciones++;
+		}
+
+		if (iteraciones == maxIter) {
+			throw new ArithmeticException("No se encontró una raíz en el número máximo de iteraciones.");
+		}
+
+		return xn;
+	}
+
+	public static void main(String[] args) {
+		System.out.println(Calcula_un_producto(4, 2));
+		System.out.println(Producto_de_una_secuencia_geométrica(3, 5, 2));
+		System.out.println(Cálculo_del_número_combinatorio(4, 2));
+		System.out.println(Número_de_Stirling_de_segunda_especie(4, 2));
+		java.util.function.Function<Float, Float> f = x -> 2 * x * x;
+		java.util.function.Function<Float, Float> fPrima = x -> 4 * x;
+
+		float a = 3.0f;
+		float epsilon = 0.001f;
+		float raiz = Método_de_Newton_para_encontrar_raíces(f, fPrima, a, epsilon);
+		System.out.println("La raíz encontrada es: " + raiz);
+	}
+
+}

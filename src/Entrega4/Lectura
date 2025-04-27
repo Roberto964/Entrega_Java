@@ -1,0 +1,98 @@
+package entrega4;
+//He usado el metodo File2 de Miguel Toro de su repositorio
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import ClasePrimero.src.us.lsi.tools.File2;
+
+public class Lecturas {
+	public static Integer Contar_palabras_en_un_archivo(String fichero, String cad) {
+		String sep = (" ");
+		List<String> Lineas = File2.lineasDeFichero(fichero);
+		Integer m = 0;
+
+		for (String linea : Lineas) {
+			List<String> palabras = Arrays.asList(linea.split(sep));
+			for (String palabra : palabras) {
+				if (palabra.toLowerCase().equals(cad.toLowerCase())) {
+					m += 1;
+				}
+			}
+		}
+		// System.out.println(String.format("En el fichero %s aparece la palabra %s un
+		// total de %d", fichero, cad, m));
+		return m;
+	}
+
+	public static List<String> Buscar_líneas_en_un_archivo(String fichero, String cad) {
+		List<String> Lineas = File2.lineasDeFichero(fichero);
+		List<String> resultado = new ArrayList<>();
+
+		for (String linea : Lineas) {
+			if (linea.toLowerCase().contains(cad.toLowerCase())) {
+				resultado.add(linea);
+			}
+			// System.out.println(String.format("En el fichero %s aparece la cadena %s un
+			// total de ", fichero, cad));
+		}
+		return resultado;
+	}
+
+	/*
+	 * Dado un archivo de texto de nombre fichero, implemente una función que
+	 * encuentre todas las palabras únicas del archivo de texto y las devuelva en
+	 * una lista sin repeticiones. Tenga en cuenta que las palabras están separadas
+	 * por espacios
+	 */
+	public static Set<String> Encontrar_palabras_únicas_en_un_archivo(String fichero) {
+		List<String> lineas = File2.lineasDeFichero(fichero);
+		Set<String> n = new HashSet<String>();
+		for (String linea : lineas) {
+			String[] palabra = linea.split(" ");// crea una array para poder usar el método split()
+			n.addAll(Arrays.asList(palabra));
+
+		}
+		// System.out.println(Lectura3(String.format("Las palabras únicas en el fichero
+		// %s son: %s",fichero, n)));
+		return n;
+	}
+	/*
+	 * Dado un fichero csv de nombre fichero, cuyos términos están separados
+	 * mediante el separador sep, implemente una función que devuelva la longitud
+	 * media de las líneas de dicho fichero.
+	 */
+
+	public static double Longitud_media_de_la_líneas_de_un_archivo_CSV(String fichero) {
+		double cuentalineas = 0;
+		double contador_de_palabras = 0;
+		try (BufferedReader br = new BufferedReader(new FileReader(fichero))) {
+			String linea;
+			while ((linea = br.readLine()) != null) {
+				String[] palabras = linea.trim().split(",");
+				cuentalineas++;
+				contador_de_palabras += palabras.length;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return contador_de_palabras / cuentalineas;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(Contar_palabras_en_un_archivo("C:\\Users\\rober\\eclipse-workspace-Java\\Entrega_de_Java\\resources\\lin_quijote.txt","Quijote"));
+		/*###################################################################################################################*/
+		System.out.println(Buscar_líneas_en_un_archivo("C:\\Users\\rober\\eclipse-workspace-Java\\Entrega_de_Java\\resources\\lin_quijote.txt","Quijote"));
+		/*###################################################################################################################*/
+		System.out.println(Encontrar_palabras_únicas_en_un_archivo("C:\\Users\\rober\\eclipse-workspace-Java\\Entrega_de_Java\\resources\\archivo_palabras.txt"));
+		/*###################################################################################################################*/
+		System.out.println(Longitud_media_de_la_líneas_de_un_archivo_CSV("C:\\Users\\rober\\eclipse-workspace-Java\\Entrega_de_Java\\resources\\palabras_random.csv"));
+	}
+}

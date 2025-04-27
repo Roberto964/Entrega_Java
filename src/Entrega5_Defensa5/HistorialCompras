@@ -1,0 +1,50 @@
+package Entrega2;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class HistorialCompras extends Pila<Compra> {
+	public double totalGastadoPor(Cliente cliente) {
+		return elementos.stream().filter(c -> c.getCliente().equals(cliente)).mapToDouble(Compra::getImporte).sum();
+	}
+
+	public List<Compra> comprasMayoresA(double cantidad) {
+		return elementos.stream().filter(c -> c.getImporte() > cantidad).collect(Collectors.toList());
+	}
+
+	public static void main(String[] args) {
+		
+		Cliente ana = Cliente.of("Ana", 5);
+		Cliente juan = Cliente.of("Juan", 2);
+		Cliente luis = Cliente.of("Luis", 7);
+
+		
+		Compra c1 = Compra.of(ana, "Agenda personalizada", 25.5);
+		Compra c2 = Compra.of(juan, "Camiseta estampada", 60.0);
+		Compra c3 = Compra.of(ana, "Taza con foto", 15.0);
+		Compra c4 = Compra.of(luis, "Poster gigante", 80.0);
+
+		
+		HistorialCompras historial = new HistorialCompras();
+		historial.add(c1);
+		historial.add(c2);
+		historial.add(c3);
+		historial.add(c4);
+
+		
+		double totalAna = historial.totalGastadoPor(ana);
+		System.out.println("Total gastado por Ana: " + totalAna + " €");
+
+		double totalLuis = historial.totalGastadoPor(luis);
+		System.out.println("Total gastado por Luis: " + totalLuis + " €");
+
+		
+		List<Compra> grandes = historial.comprasMayoresA(30.0);
+		System.out.println("\nCompras mayores a 30 €:");
+		for (Compra c : grandes) {
+			System.out.println(c);
+		}
+		
+	}
+
+}

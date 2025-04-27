@@ -1,0 +1,110 @@
+package Entrega2;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ColaPrioridad<E, P extends Comparable<P>> extends Cola<PriorityElement<E, P>> {
+	private List<PriorityElement<E, P>> elementos = new ArrayList<>(); // Lista interna
+
+	public static <E, P extends Comparable<P>> ColaPrioridad<E, P> ofPriority() {
+		return new ColaPrioridad<E, P>();
+	}
+
+	@Override
+	public void add(PriorityElement<E, P> element) {
+		int i = 0;
+		while (i < elementos.size() && elementos.get(i).priority().compareTo(element.priority()) <= 0) {
+			i++;
+		}
+		elementos.add(i, element);
+	}
+
+	public void add(E value, P priority) {
+		PriorityElement<E, P> otroelemento = new PriorityElement<>(value, priority);
+		add(otroelemento);
+	}
+
+	public List<E> valuesAsList() {
+		List<E> valores = new ArrayList<>();
+		for (PriorityElement<E, P> elemento : elementos) {
+			valores.add(elemento.value());
+		}
+		return valores;
+	}
+
+	public void decreasePriority(E value, P newPriority) {
+		for (int i = 0; i < elementos.size(); i++) {
+			if (elementos.get(i).value().equals(value)) {
+				elementos.remove(i);
+				add(value, newPriority); // Reinsertar con nueva prioridad
+				return;
+			}
+		}
+	}
+
+	public E removeValue() {
+		if (elementos.isEmpty()) {
+			throw new IllegalStateException("Está vacío");
+		}
+		return elementos.remove(0).value(); // Eliminar el de mayor prioridad
+	}
+
+	public void addAllValues(List<E> values, P priority) {
+		for (E valores : values) {
+			add(valores, priority);
+		}
+	}
+
+	public static void main(String[] args) {
+		  ColaPrioridad<String, Integer> colaPrioridad = ColaPrioridad.ofPriority();
+
+	        // Añadir elementos con prioridad
+	        System.out.println("Añadiendo elementos con prioridad:");
+	        colaPrioridad.add("Crítico", 1);
+	        colaPrioridad.add("Normal", 3);
+	        colaPrioridad.add("Urgente", 2);
+	        colaPrioridad.add("Bajo", 4);
+
+	        // Mostrar los elementos en la cola por prioridad
+	        List<String> valores = colaPrioridad.valuesAsList();
+	        System.out.println("Elementos en la cola por prioridad: " + valores);
+
+	        // Mostrar elementos con sus prioridades
+	        System.out.println("Elementos con sus prioridades: " + colaPrioridad.elementos);
+
+	        // Tamaño de la cola
+	        System.out.println("Tamaño de la cola: " + colaPrioridad.elementos.size());
+
+	        // Cambiar la prioridad de un elemento
+	        System.out.println("\nCambiando la prioridad de 'Normal' de 3 a 1:");
+	        colaPrioridad.decreasePriority("Normal", 1);
+	        valores = colaPrioridad.valuesAsList();
+	        System.out.println("Elementos con prioridad actualizada: " + valores);
+
+	        // Desencolar elementos por prioridad
+	        System.out.println("\nDesencolando elementos por prioridad:");
+
+	        System.out.println("Desencolado: " + colaPrioridad.removeValue());
+	        System.out.println("Cola restante: " + colaPrioridad.valuesAsList());
+
+	        System.out.println("Desencolado: " + colaPrioridad.removeValue());
+	        System.out.println("Cola restante: " + colaPrioridad.valuesAsList());
+
+	        System.out.println("Desencolado: " + colaPrioridad.removeValue());
+	        System.out.println("Cola restante: " + colaPrioridad.valuesAsList());
+
+	        System.out.println("Desencolado: " + colaPrioridad.removeValue());
+	        System.out.println("Cola restante: " + colaPrioridad.valuesAsList());
+
+	        // Verificar si la cola está vacía
+	        System.out.println("\n¿Está vacía? " + colaPrioridad.elementos.isEmpty());
+
+	        // Intentar desencolar de una cola vacía
+	        try {
+	            System.out.println("\nIntentando desencolar de una cola vacía...");
+	            colaPrioridad.removeValue();
+	        } catch (IllegalStateException e) {
+	            System.out.println("Excepción correctamente lanzada al intentar desencolar de una cola vacía: No se puede eliminar de una cola vacía.");
+	        }
+	}
+}

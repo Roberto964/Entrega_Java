@@ -1,0 +1,53 @@
+package Entrega2;
+
+import java.util.Objects;
+
+public class Compra {
+	private final Cliente cliente;
+	private final String descripcion;
+	private final double importe;
+
+	private Compra(Cliente cliente, String descripcion, double importe) {
+		this.cliente = cliente;
+		this.descripcion = descripcion;
+		this.importe = importe;
+	}
+
+	@Override
+	public String toString() {
+		return "Compra [cliente=" + cliente + ", descripcion=" + descripcion + ", importe=" + importe + "]";
+	}
+
+	public static Compra of(Cliente cliente, String descripcion, double importe) {
+		return new Compra(cliente, descripcion, importe);
+	}
+
+	public Cliente getCliente() {
+		return cliente;
+	}
+
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public double getImporte() {
+		return importe;
+	}
+
+	
+
+	public boolean iguales(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Compra))
+			return false;
+		Compra compra = (Compra) o;
+		return Double.compare(compra.importe, importe) == 0 && cliente.equals(compra.cliente)
+				&& descripcion.equals(compra.descripcion);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(cliente, descripcion, importe);
+	}
+}

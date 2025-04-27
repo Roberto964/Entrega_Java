@@ -1,0 +1,51 @@
+package Entrega2;
+
+public class Cola<E> extends AgregadoLineal<E>  {
+	public static <E> Cola<E> of(){
+		return new Cola<>();
+	}
+    @Override
+    public void add(E e) {
+    	elementos.add(e);
+    }
+
+	public static void main(String[] args) {
+	        // Crear una nueva cola
+	        Cola<String> cola = Cola.of();
+
+	        // Añadir elementos
+	        cola.add("primero");
+	        cola.add("segundo");
+	        cola.add("tercero");
+
+	        // Mostrar los elementos en la cola
+	        System.out.println("Elementos en la cola: " + cola.elementos);  // Directamente accedemos a elementos para ver el contenido
+	        System.out.println("Tamaño de la cola: " + cola.size());
+
+	        // Desencolar elementos
+	        System.out.println("\nDesencolando elementos:");
+
+	        
+	        System.out.println("Desencolado: " + cola.remove());
+	        System.out.println("Cola restante: " + cola.elementos);
+
+	        
+	        System.out.println("Desencolado: " + cola.remove());
+	        System.out.println("Cola restante: " + cola.elementos);
+
+	        
+	        System.out.println("Desencolado: " + cola.remove());
+	        System.out.println("Cola restante: " + cola.elementos);
+
+	        // Verificar si la cola está vacía
+	        System.out.println("\n¿Está vacía? " + cola.isEmpty());
+
+	        // Intentar desencolar de una cola vacía y manejar la excepción
+	        try {
+	            cola.remove();  // Esto debería lanzar una excepción
+	        } catch (IllegalStateException e) {
+	            System.out.println("\nExcepción correctamente lanzada al intentar desencolar de una cola vacía: " + e.getMessage());
+	        }
+	}
+
+}

@@ -1,0 +1,48 @@
+package Entrega2;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ColaComprasPendientes extends Cola<Compra> {
+	public Compra buscarCompraPorDescripcion(String desc) {
+		for (Compra c : elementos) {
+			if (c.getDescripcion().toLowerCase().contains(desc.toLowerCase())) {
+				return c;
+			}
+		}
+		return null;
+	}
+
+	public List<Compra> filtrarPorClienteYProducto(Cliente cliente, String producto) {
+		return elementos.stream()
+				.filter(c -> c.getCliente().equals(cliente)
+						&& c.getDescripcion().toLowerCase().contains(producto.toLowerCase()))
+				.collect(Collectors.toList());
+	}
+
+	public static void main(String[] args) {
+		Cliente ana = Cliente.of("Ana", 5);
+		Cliente juan = Cliente.of("Juan", 2);
+		Cliente luis = Cliente.of("Luis", 7);
+
+		Compra c1 = Compra.of(ana, "Agenda personalizada", 25.5);
+		Compra c2 = Compra.of(juan, "Camiseta estampada", 60.0);
+		Compra c3 = Compra.of(ana, "Taza con foto", 15.0);
+		Compra c4 = Compra.of(luis, "Poster gigante", 80.0);
+
+		ColaComprasPendientes cola = new ColaComprasPendientes();
+		cola.add(c1);
+		cola.add(c2);
+		cola.add(c3);
+		cola.add(c4);
+
+		Compra resultadoBusqueda = cola.buscarCompraPorDescripcion("agenda");
+		System.out.println("Resultado de búsqueda por descripción 'agenda': " + resultadoBusqueda);
+
+		List<Compra> resultadoFiltrado = cola.filtrarPorClienteYProducto(ana, "taza");
+		System.out.println("\nResultado de filtrado por cliente 'Ana' y producto 'taza':");
+		for (Compra c : resultadoFiltrado) {
+			System.out.println(c);
+		}
+	}
+}

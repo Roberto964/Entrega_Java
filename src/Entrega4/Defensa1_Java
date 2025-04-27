@@ -1,0 +1,150 @@
+package entrega4;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import ClasePrimero.src.us.lsi.tools.File2;
+
+public class Defensa1 {
+	// Dado un número entero n, implemente una función productoImpares que calcule
+	// el producto de
+	// los primeros n números impares. No olvide validar que el parámetro n es
+	// positivo y que n > 0
+	public static Double productoImpares(Integer n) {
+		if (n < 0) {
+			throw new IllegalArgumentException("El numero debe ser mayor que 0");
+		}
+		Double producto = 1.;
+		Integer numeroImpar = 1;
+		for (int i = 0; i < n; i++) {
+			producto *= numeroImpar;
+			numeroImpar += 2;
+		}
+
+		return producto;
+	}
+
+	/*
+	 * Diseñe una función sumaGeometricaAlternada que calcule la suma de los
+	 * primeros k términos de una secuencia geométrica donde cada término sigue la
+	 * regla: 𝑎𝑛 = (−1)𝑛 · 𝑎1 · 𝑟(𝑛−1) La función recibirá como parámetros de
+	 * entrada: • Double 𝑎1: El primer término de la secuencia. • Double 𝑟: La
+	 * razón de la progresión geométrica. • int 𝑘: Cantidad de términos a sumar. No
+	 * olvide las siguientes validaciones: • 𝑘 debe ser mayor que 0 → Si 𝑘 ≤ 0,
+	 * lanzar IllegalArgumentException("𝑘 debe ser mayor que 0"). • 𝑎1 y 𝑟 deben
+	 * ser positivos
+	 */
+	public static Double sumaGeometricaAlternada(Double a1, Double r, Integer k) {
+		if (k <= 0) {
+			throw new IllegalArgumentException("El numero debe ser mayor que 0");
+		}
+		if (r <= 0 || a1 <= 0) {
+			throw new IllegalArgumentException("a1 y r deben ser positivo");
+		}
+		Double suma = 0.;
+		for (Integer n = 1; n <= k; n++) {
+			Double termino = Math.pow(-1, n) * a1 * Math.pow(r, n - 1);
+			suma += termino;
+		}
+		return suma;
+
+	}
+
+	/*
+	 * Implemente una función combinatorioSinMultiplosDeTres que calcule el número
+	 * combinatorio (n¦k) sin considerar aquellos valores donde el numerador o
+	 * denominador sea múltiplo de 3. No olvide validar que 𝑛 ≥ 𝑘 y que ambos sean
+	 * positivos
+	 */
+	public static Double combinatorioSinMultiplosDeTres(Integer n, Integer k) {
+		if (n <= k) {
+			throw new IllegalArgumentException("El n debe ser mayor que k ");
+		}
+		if (n < 0 || k < 0) {
+			throw new IllegalArgumentException("El n y k deben ser positivos");
+		}
+		Double numerador = 1.;
+		for (Integer i = n; i > n - k; i--) {
+			if (i % 3 != 0) {
+				numerador *= i;
+			}
+		}
+		Double denominador = 1.;
+		for (Integer i = k; i > 0; i--) {
+			if (i % 3 != 0) {
+				denominador *= i;
+			}
+		}
+		return numerador / denominador;
+	}
+
+	/*
+	 * Dado un archivo de texto fichero.txt, implemente una función
+	 * filtrarLineasConsecutivas que devuelva todas las líneas donde aparezcan al
+	 * menos dos palabras consecutivas de una lista dada. La función debe recibir el
+	 * nombre del archivo y una lista de palabras clave. Controle que la lectura del
+	 * archivo de texto ha sido correcta, usando try/catch.
+	 */
+	public static String filtrarLineasConsecutivas(String Fichero, String string) throws IOException {
+		List<String> resultado = new ArrayList<>();
+		List<String> lineas;
+
+		lineas = File2.lineasDeFichero(Fichero);
+
+		for (String linea : lineas) {
+
+			String[] palabras = linea.split("\\s+");
+			for (int i = 0; i < palabras.length - 1; i++) {
+				String palabraActual = palabras[i].replaceAll("\\W", "");
+				String palabraSiguiente = palabras[i + 1].replaceAll("\\W", "");
+
+				if (string.contains(palabraActual) && string.contains(palabraSiguiente)) {
+					resultado.add(linea);
+					break;
+				}
+			}
+		}
+
+		return String.join("\n", resultado);
+	}
+
+	public static void main(String[] args) {
+		try {
+
+			System.out.println("Resultado productoImpares(8): " + productoImpares(8));
+			System.out.println("Resultado sumaGeometricaAlternada(2., 3., 5): " + sumaGeometricaAlternada(2., 3., 5));
+			System.out
+					.println("Resultado combinatorioSinMultiplosDeTres(5, 3): " + combinatorioSinMultiplosDeTres(5, 3));
+
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error en los parámetros: " + e.getMessage());
+		} catch (ArithmeticException e) {
+			System.out.println("Error aritmético: " + e.getMessage());
+		} catch (Exception e) {
+			System.out.println("Error inesperado: " + e.getMessage());
+		}
+		try {
+			System.out.println(filtrarLineasConsecutivas(
+					"C:\\Users\\rober\\eclipse-workspace-Java\\Entrega_de_Java\\resources\\lin_quijote.txt",
+					"Quijote"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		/*
+		 * Lectura del  Quijote y archivo_palabras
+		 * 
+		 */
+		try {
+			System.out.println(filtrarLineasConsecutivas(
+					"C:\\Users\\rober\\eclipse-workspace-Java\\Entrega_de_Java\\resources\\archivo_palabras.txt",
+					"salud"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+}
