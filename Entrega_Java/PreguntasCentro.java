@@ -40,7 +40,9 @@ public class PreguntasCentro {
 		Profesores pr = c.profesores();
 		Asignaciones as = c.asignaciones();
 		Set<String> AlumnosMatriculados = ms.todas().stream().filter(matricula->matricula.dni().equals(dni)).map(matricula->matricula.ida()+"-"+matricula.idg()).collect(Collectors.toSet());
-		Set<Profesores> ProfesoresAlumnos = as.todas().stream().filter(profesor->);
+		Set<String> AsignacionesDniProfesor= as.todas().stream().filter(asignacion->AlumnosMatriculados.contains(asignacion.ida()+"-"+asignacion.idg())).map(Asignacion::dni).collect(Collectors.toSet());
+		 List<Profesor> numeroProfesoresAlumnos = pr.todos().stream().filter(profesor->AsignacionesDniProfesor.contains(profesor.dni())).collect(Collectors.toList());
+		 return numeroProfesoresAlumnos.stream().mapToDouble(profesor->profesor.edad()).average().orElse(0.);
 	}
 
 	public Set<String> grupoMayorDiversidadEdadImperativo() {
