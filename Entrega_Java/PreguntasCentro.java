@@ -2,10 +2,13 @@ package Entrega_Java;
 
 import java.time.LocalDate;
 import us.lsi.centro.*;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PreguntasCentro {
 	public Double promedioEdadProfesoresImperativo(String dni) {
@@ -39,14 +42,26 @@ public class PreguntasCentro {
 		Matriculas ms = c.matriculas();
 		Profesores pr = c.profesores();
 		Asignaciones as = c.asignaciones();
-		Set<String> AlumnosMatriculados = ms.todas().stream().filter(matricula->matricula.dni().equals(dni)).map(matricula->matricula.ida()+"-"+matricula.idg()).collect(Collectors.toSet());
-		Set<String> AsignacionesDniProfesor= as.todas().stream().filter(asignacion->AlumnosMatriculados.contains(asignacion.ida()+"-"+asignacion.idg())).map(Asignacion::dni).collect(Collectors.toSet());
-		 List<Profesor> numeroProfesoresAlumnos = pr.todos().stream().filter(profesor->AsignacionesDniProfesor.contains(profesor.dni())).collect(Collectors.toList());
-		 return numeroProfesoresAlumnos.stream().mapToDouble(profesor->profesor.edad()).average().orElse(0.);
+		Set<String> AlumnosMatriculados = ms.todas().stream().filter(matricula -> matricula.dni().equals(dni))
+				.map(matricula -> matricula.ida() + "-" + matricula.idg()).collect(Collectors.toSet());
+		Set<String> AsignacionesDniProfesor = as.todas().stream()
+				.filter(asignacion -> AlumnosMatriculados.contains(asignacion.ida() + "-" + asignacion.idg()))
+				.map(Asignacion::dni).collect(Collectors.toSet());
+		List<Profesor> numeroProfesoresAlumnos = pr.todos().stream()
+				.filter(profesor -> AsignacionesDniProfesor.contains(profesor.dni())).collect(Collectors.toList());
+		return numeroProfesoresAlumnos.stream().mapToDouble(profesor -> profesor.edad()).average().orElse(0.);
 	}
 
 	public Set<String> grupoMayorDiversidadEdadImperativo() {
-		return null;
+		Centro c = Centro.of();
+		Matriculas ms = c.matriculas();
+		Profesores pr = c.profesores();
+		Asignaciones as = c.asignaciones();
+		Alumnos al = c.alumnos();
+		Grupos gr = c.grupos();
+		for (Grupo gp : gr.todos()) {
+			List<Integer> Aln = gp.idg();
+		}
 	}
 
 	public Set<String> grupoMayorDiversidadEdadFuncional() {
@@ -54,11 +69,40 @@ public class PreguntasCentro {
 	}
 
 	public String alumnoMasMatriculasImperativo() {
-		return null;
+		Centro c = Centro.of();
+		Matriculas ms = c.matriculas();
+
+		Map<String, Integer> contador = new HashMap<>();
+
+		for (Matricula mt : ms.todas()) {
+			String dni = mt.dni();
+			Integer cuenta = contador.get(dni);
+			if (cuenta == null) {
+				contador.put(dni, 1);
+			} else {
+				contador.put(dni, cuenta + 1);
+			}
+		}
+
+		String dniMax = null;
+		int max = 0;
+
+		for (Map.Entry<String, Integer> entry : contador.entrySet()) {
+			if (entry.getValue() > max) {
+				max = entry.getValue();
+				dniMax = entry.getKey();
+			}
+		}
+
+		return dniMax; 
 	}
 
 	public String alumnoMasMatriculasFuncional() {
-		return null;
+		Centro c = Centro.of();
+		Matriculas ms = c.matriculas();
+		Map<String,Long> MatriculaPorAlumno = ms.todas().stream().map(Matricula::dni).collect(Collectors.groupingBy(dni->dni,Collectors.counting()));//Contamos cuntas veces aparece un dni del alumno
+		return MatriculaPorAlumno.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(null);//con ese dni del alumno tenemos q compararlo con el resto de dni, y sacamos el mayor
+		
 	}
 
 	public Map<String, String> rangosEdadPorAlumnoImperativo() {
