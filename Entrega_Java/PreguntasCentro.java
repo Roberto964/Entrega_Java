@@ -114,8 +114,45 @@ public class PreguntasCentro {
 	}
 
 	public String nombreProfesorMasGruposImperativo(Integer min, Integer max) {
-		return null;
+		Centro c = Centro.of();
+		Matriculas ms = c.matriculas();
+		Profesores pr = c.profesores();
+		Asignaciones as = c.asignaciones();
+		Alumnos al = c.alumnos();
+		Grupos gr = c.grupos();
+		
+		Map<String, Integer> contadorGrupos = new HashMap<>();
+		
+		if (min >= max) {
+		    throw new IllegalArgumentException("La edad mínima debe ser menor que la máxima");
+		}
+		for(Profesor prf:pr.todos()) {
+			if(prf.edad()>=min && prf.edad()<=max) {//comprobamos q la edad del profesor está dentro del rango, porque tiene q estar dentro del rg
+				contadorGrupos.put(prf.dni(), 0);
+			}
+		}
+		for(Asignacion asg:as.todas()) {
+			 String dniProf= asg.dni();
+			    if (contadorGrupos.containsKey(dniProf)) {
+			    	contadorGrupos.put(dniProf, contadorGrupos.get(dniProf) + 1);
+			    }
+		}
+		String dniMax = null;
+		int maxGrupos = -1;
+		for (Map.Entry<String, Integer> entry : contadorGrupos.entrySet()) {
+		    if (entry.getValue() > maxGrupos) {
+		        maxGrupos = entry.getValue();
+		        dniMax = entry.getKey();
+		    }
+		}
+
+		if (dniMax == null) return null; // o lanzar excepción si prefieres
+
+		Profesor profMax = pr.profesor(dniMax);
+		return profMax.nombreCompleto();
+
 	}
+	
 
 	public String nombreProfesorMasGruposFuncional(Integer min, Integer max) {
 		return null;
