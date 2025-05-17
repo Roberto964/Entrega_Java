@@ -5,10 +5,14 @@ import java.time.LocalDateTime;
 
 import us.lsi.centro.*;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,20 +60,85 @@ public class PreguntasCentro {
 	}
 
 	public Set<String> grupoMayorDiversidadEdadImperativo() {
-		Centro c = Centro.of();
-		Matriculas ms = c.matriculas();
-		Profesores pr = c.profesores();
-		Asignaciones as = c.asignaciones();
-		Alumnos al = c.alumnos();
-		Grupos gr = c.grupos();
-		for (Grupo gp : gr.todos()) {
-			List<Integer> Aln = gp.idg();
-		}
+	    Centro c = Centro.of();
+	    Matriculas ms = c.matriculas();
+	    Alumnos al = c.alumnos();
+	    Grupos gr = c.grupos();
+
+	    int maxDiferencia = -1;
+	    Set<String> grupoMax = new HashSet<>();
+
+	    for (Grupo grupo : gr.todos()) {
+	        List<Alumno> alumnosDelGrupo = new ArrayList<>();
+
+	        for (Matricula m : ms.todas()) {
+	            if (m.ida().equals(grupo.ida()) && m.idg().equals(grupo.idg())) {
+	                Alumno alumno = al.alumno(m.dni());
+	                if (alumno != null) {
+	                    alumnosDelGrupo.add(alumno);
+	                }
+	            }
+	        }
+
+	        if (!alumnosDelGrupo.isEmpty()) {
+	            int minEdad = Integer.MAX_VALUE;
+	            int maxEdad = Integer.MIN_VALUE;
+
+	            for (Alumno a : alumnosDelGrupo) {
+	                int edad = a.edad();
+	                if (edad < minEdad) minEdad = edad;
+	                if (edad > maxEdad) maxEdad = edad;
+	            }
+
+	            int diferencia = maxEdad - minEdad;
+
+	            if (diferencia > maxDiferencia) {
+	                maxDiferencia = diferencia;
+	                grupoMax.clear();
+	                grupoMax.add("ida: " + grupo.ida() + ", idg: " + grupo.idg());
+	            }
+	        }
+	    }
+
+	    return grupoMax;
 	}
 
+
 	public Set<String> grupoMayorDiversidadEdadFuncional() {
-		return null;
+	    Centro centro = Centro.of();
+	    List<Grupo> grupos = (List<Grupo>) centro.grupos().todos();
+	    List<Matricula> matriculas = (List<Matricula>) centro.matriculas().todas();
+	    Alumnos alumnos = centro.alumnos();
+
+	    
+	    return grupos.stream()
+	        .map(grupo -> {
+	            
+	            List<Alumno> alumnosDelGrupo = matriculas.stream()
+	                .filter(m -> m.ida().equals(grupo.ida()) && m.idg().equals(grupo.idg()))
+	                .map(m -> alumnos.alumno(m.dni()))
+	                .filter(Objects::nonNull)
+	                .toList();
+
+	            if (alumnosDelGrupo.isEmpty()) return null;
+
+	            
+	            int minEdad = alumnosDelGrupo.stream().mapToInt(Alumno::edad).min().orElse(0);
+	            int maxEdad = alumnosDelGrupo.stream().mapToInt(Alumno::edad).max().orElse(0);
+	            int diferencia = maxEdad - minEdad;
+
+	            
+	            return new AbstractMap.SimpleEntry<>(grupo, diferencia);
+	        })
+	        .filter(Objects::nonNull) 
+	        .max(Comparator.comparingInt(Map.Entry::getValue)) 
+	        .map(entry -> {
+	            Grupo g = entry.getKey();
+	            return Set.of("ida: " + g.ida() + ", idg: " + g.idg());
+	        })
+	        .orElse(Set.of());
 	}
+
 
 	public String alumnoMasMatriculasImperativo() {
 		Centro c = Centro.of();
