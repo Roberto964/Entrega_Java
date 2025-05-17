@@ -1,8 +1,11 @@
 package Entrega_Java;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import us.lsi.centro.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,15 +97,19 @@ public class PreguntasCentro {
 			}
 		}
 
-		return dniMax; 
+		return dniMax;
 	}
 
 	public String alumnoMasMatriculasFuncional() {
 		Centro c = Centro.of();
 		Matriculas ms = c.matriculas();
-		Map<String,Long> MatriculaPorAlumno = ms.todas().stream().map(Matricula::dni).collect(Collectors.groupingBy(dni->dni,Collectors.counting()));//Contamos cuntas veces aparece un dni del alumno
-		return MatriculaPorAlumno.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(null);//con ese dni del alumno tenemos q compararlo con el resto de dni, y sacamos el mayor
-		
+		Map<String, Long> MatriculaPorAlumno = ms.todas().stream().map(Matricula::dni)
+				.collect(Collectors.groupingBy(dni -> dni, Collectors.counting()));// Contamos cuntas veces aparece un
+																					// dni del alumno
+		return MatriculaPorAlumno.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey)
+				.orElse(null);// con ese dni del alumno tenemos q compararlo con el resto de dni, y sacamos el
+								// mayor
+
 	}
 
 	public Map<String, String> rangosEdadPorAlumnoImperativo() {
@@ -115,55 +122,82 @@ public class PreguntasCentro {
 
 	public String nombreProfesorMasGruposImperativo(Integer min, Integer max) {
 		Centro c = Centro.of();
-		Matriculas ms = c.matriculas();
 		Profesores pr = c.profesores();
 		Asignaciones as = c.asignaciones();
-		Alumnos al = c.alumnos();
-		Grupos gr = c.grupos();
 		
+
 		Map<String, Integer> contadorGrupos = new HashMap<>();
-		
+
 		if (min >= max) {
-		    throw new IllegalArgumentException("La edad mínima debe ser menor que la máxima");
+			throw new IllegalArgumentException("La edad mínima debe ser menor que la máxima");
 		}
-		for(Profesor prf:pr.todos()) {
-			if(prf.edad()>=min && prf.edad()<=max) {//comprobamos q la edad del profesor está dentro del rango, porque tiene q estar dentro del rg
+		for (Profesor prf : pr.todos()) {
+			if (prf.edad() >= min && prf.edad() <= max) {// comprobamos q la edad del profesor está dentro del rango,
+															// porque tiene q estar dentro del rg
 				contadorGrupos.put(prf.dni(), 0);
 			}
 		}
-		for(Asignacion asg:as.todas()) {
-			 String dniProf= asg.dni();
-			    if (contadorGrupos.containsKey(dniProf)) {
-			    	contadorGrupos.put(dniProf, contadorGrupos.get(dniProf) + 1);
-			    }
+		for (Asignacion asg : as.todas()) {
+			String dniProf = asg.dni();
+			if (contadorGrupos.containsKey(dniProf)) {
+				contadorGrupos.put(dniProf, contadorGrupos.get(dniProf) + 1);
+			}
 		}
 		String dniMax = null;
 		int maxGrupos = -1;
 		for (Map.Entry<String, Integer> entry : contadorGrupos.entrySet()) {
-		    if (entry.getValue() > maxGrupos) {
-		        maxGrupos = entry.getValue();
-		        dniMax = entry.getKey();
-		    }
+			if (entry.getValue() > maxGrupos) {
+				maxGrupos = entry.getValue();
+				dniMax = entry.getKey();
+			}
 		}
 
-		if (dniMax == null) return null; // o lanzar excepción si prefieres
+		if (dniMax == null)
+			return null;
 
 		Profesor profMax = pr.profesor(dniMax);
 		return profMax.nombreCompleto();
 
 	}
-	
 
 	public String nombreProfesorMasGruposFuncional(Integer min, Integer max) {
 		return null;
 	}
 
 	public List<String> nombresAlumnosMayorNotaImperativo(Integer n, LocalDate a) {
-		return null;
+		Centro c = Centro.of();
+		Alumnos alums = c.alumnos();
+		ArrayList<String> AlumnosTop = new ArrayList<>();
+
+		if (n == null) {
+			throw new IllegalArgumentException("La nota de los alumnos no puede ser null");
+		}
+		for (Alumno alum : alums.todos()) {
+			if (alum.fechaDeNacimiento().toLocalDate().isAfter(a) && n < 10 && n > 1) {// pasamos la fecha de nacimiento
+																						// a LocalDate y vemos si está
+																						// despues de la fecha "a" y
+																						// comporbamos q esta dentro del
+																						// limite
+				if (alum.nota() >= n) {
+					AlumnosTop.add(alum.nombre());
+				}
+			}
+		}
+		return AlumnosTop;
 	}
 
 	public List<String> nombresAlumnosMayorNotaFuncional(Integer n, LocalDate a) {
-		return null;
+		Centro c = Centro.of();
+		Alumnos alums = c.alumnos();
+		if (n == null) {
+			throw new IllegalArgumentException("La nota de los alumnos no puede ser null ");
+		}
+		if (n < 10 && n > 1) {
+			throw new IllegalArgumentException("La nota de los alumnos debe estar entre 2 y 9 ");
+		}
+
+		return alums.todos().stream().filter(alumno -> alumno.fechaDeNacimiento().toLocalDate().isAfter(a))
+				.filter(alumno -> alumno.nota() >= n).map(alumno -> alumno.nombre()).collect(Collectors.toList());
 	}
 
 	public static void main(String[] args) {
