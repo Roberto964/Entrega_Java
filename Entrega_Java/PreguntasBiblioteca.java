@@ -2,16 +2,18 @@ package Entrega_Java;
 
 import java.io.IOException;
 
+import us.lsi.biblioteca.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import us.lsi.bancos.Prestamo;
+import us.lsi.bancos.Prestamos;
 import us.lsi.biblioteca.Libro;
 import us.lsi.biblioteca.Libros;
 import us.lsi.centro.Titulo;
@@ -20,38 +22,42 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PreguntasBiblioteca {
-	public Map<String, Integer> masVecesPrestadoImperativo() {
-		Map<String, Integer> conteoPrestamos = new HashMap<>();
+	public Libro masVecesPrestadoImperativa() {
+		
+		Prestamos pr = Prestamos.of();
+        Libro libroMasPrestado = null;
+        Integer maxPrestamos = Integer.MIN_VALUE;
 
-	    // Contar préstamos por ISBN
-	    for (Prestamo prestamo : prestamos.of().todos()) {
-	        conteoPrestamos.put(
-	            prestamo.isbn(),
-	            conteoPrestamos.getOrDefault(prestamo.isbn(), 0) + 1
-	        );
+        for (Libro l : Libros.of().todos()) {
+            Integer numPrestamos = 0;
+
+            for (Prestamo p :pr.todos()) {//da error no se porque creo q es del "eclipse"
+                if (l.isbn().equals(p.isbn())){
+                    numPrestamos++;
+                }
+            }
+
+            if (numPrestamos > maxPrestamos) {
+                maxPrestamos = numPrestamos;
+                libroMasPrestado = l;
+            }
+        }
+        return libroMasPrestado;
+    }
+
+	   public Libro masVecesPrestadoFuncional() {
+	        Prestamos prestamos = Prestamos.of();
+	        Libros libros = Libros.of();
+
+	        return libros.todos().stream()
+	            .max(Comparator.comparingInt(
+	                libro -> (int) prestamos.todos().stream()
+	                    .filter(prestamo -> prestamo.isbn().equals(libro.isbn()))//no se porque no me lee prestamo si está en los atributos
+	                    .count()
+	            ))
+	            .orElse(null);
 	    }
-
-	    // Encontrar el ISBN con más préstamos
-	    String isbnMax = null;
-	    int maxVeces = 0;
-
-	    for (Map.Entry<String, Integer> entry : conteoPrestamos.entrySet()) {
-	        if (entry.getValue() > maxVeces) {
-	            isbnMax = entry.getKey();
-	            maxVeces = entry.getValue();
-	        }
-	    }
-
-	    if (isbnMax == null) return null; // No hay préstamos
-
-	    Libro libro = libros.libro(isbnMax);
-	    return new LibroPrestado(libro, maxVeces);
-	}
 	
-
-	public Map<String, Integer> masVecesPrestadoFuncional() {
-		return null;
-	}
 
 	Map<String, Set<String>> librosPorAutorImperativo(Libros libros, List<String> nombres) {
 
@@ -81,5 +87,21 @@ public class PreguntasBiblioteca {
 		return libros.todos().stream().filter(libro -> nombres == null || nombres.contains(libro.titulo())).collect(
 				Collectors.groupingBy(libro -> libro.autor(), Collectors.mapping(Libro::titulo, Collectors.toSet())));
 	}
+	 public static void main(String[] args) {
+	        PreguntasBiblioteca pb = new PreguntasBiblioteca();
+	   
+	        
+	        Libro libroImperativo = pb.masVecesPrestadoImperativa();
+	        System.out.println("Libro más veces prestado (Imperativo): " + (libroImperativo != null ? libroImperativo.titulo() : "No hay libros"));
 
+	        Libro libroFuncional = pb.masVecesPrestadoFuncional();
+	        System.out.println("Libro más veces prestado (Funcional): " + (libroFuncional != null ? libroFuncional.titulo() : "No hay libros"));
+
+	        List<String> autores = List.of("Autor1", "Autor2"); 
+	        Map<String, Set<String>> librosPorAutorImperativo = pb.librosPorAutorImperativo(Libros.of(), autores);
+	        System.out.println("Libros por autor (Imperativo): " + librosPorAutorImperativo);
+	     
+	        Map<String, Set<String>> librosPorAutorFuncional = pb.librosPorAutorFuncional(Libros.of(), autores);
+	        System.out.println("Libros por autor (Funcional): " + librosPorAutorFuncional);
+	    }
 }
