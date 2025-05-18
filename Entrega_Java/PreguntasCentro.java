@@ -1,12 +1,11 @@
 package Entrega_Java;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import us.lsi.centro.*;
 
+import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PreguntasCentro {
 	public Double promedioEdadProfesoresImperativo(String dni) {
@@ -30,7 +28,7 @@ public class PreguntasCentro {
 				for (Asignacion asn : as.todas()) {
 					if (ma.ida() == asn.ida() && ma.idg() == asn.idg()) {
 						for (Profesor pro : pr.todos()) {
-							if (asn.dni() == pro.dni()) {
+							if (asn.dni().equals(pro.dni())) {
 								contador += 1;
 								edadProfesor += pro.edad();
 
@@ -104,39 +102,30 @@ public class PreguntasCentro {
 	}
 
 
-	public Set<String> grupoMayorDiversidadEdadFuncional() {
-	    Centro centro = Centro.of();
-	    List<Grupo> grupos = (List<Grupo>) centro.grupos().todos();
-	    List<Matricula> matriculas = (List<Matricula>) centro.matriculas().todas();
-	    Alumnos alumnos = centro.alumnos();
-
-	    
-	    return grupos.stream()
-	        .map(grupo -> {
-	            
-	            List<Alumno> alumnosDelGrupo = matriculas.stream()
-	                .filter(m -> m.ida().equals(grupo.ida()) && m.idg().equals(grupo.idg()))
-	                .map(m -> alumnos.alumno(m.dni()))
+	public Grupo grupoMayorDiversidadEdadFuncional() {
+		Centro c = Centro.of();
+	    return c.grupos().todos().stream()
+	        .map(gr -> {
+	            List<Alumno> listaAlumnos = c.matriculas().todas().stream()
+	                .filter(m -> m.ida().equals(gr.ida()) && m.idg().equals(gr.idg()))
+	                .map(m -> c.alumnos().alumno(m.dni()))
 	                .filter(Objects::nonNull)
-	                .toList();
+	                .collect(Collectors.toList());
 
-	            if (alumnosDelGrupo.isEmpty()) return null;
+	            if (listaAlumnos.isEmpty()) {
+	                return null;
+	            }
 
-	            
-	            int minEdad = alumnosDelGrupo.stream().mapToInt(Alumno::edad).min().orElse(0);
-	            int maxEdad = alumnosDelGrupo.stream().mapToInt(Alumno::edad).max().orElse(0);
-	            int diferencia = maxEdad - minEdad;
+	            int edadMinima = listaAlumnos.stream().mapToInt(Alumno::edad).min().orElse(Integer.MAX_VALUE);
+	            int edadMaxima = listaAlumnos.stream().mapToInt(Alumno::edad).max().orElse(Integer.MIN_VALUE);
+	            int diferenciaEdad = edadMaxima - edadMinima;
 
-	            
-	            return new AbstractMap.SimpleEntry<>(grupo, diferencia);
+	            return new Object[] { gr, diferenciaEdad };
 	        })
-	        .filter(Objects::nonNull) 
-	        .max(Comparator.comparingInt(Map.Entry::getValue)) 
-	        .map(entry -> {
-	            Grupo g = entry.getKey();
-	            return Set.of("ida: " + g.ida() + ", idg: " + g.idg());
-	        })
-	        .orElse(Set.of());
+	        .filter(Objects::nonNull)
+	        .max(Comparator.comparingInt(arr -> (int) arr[1]))
+	        .map(arr -> (Grupo) arr[0])
+	        .orElse(null);
 	}
 
 
@@ -181,13 +170,58 @@ public class PreguntasCentro {
 
 	}
 
-	public Map<String, String> rangosEdadPorAlumnoImperativo() {
-		return null;
-	}
+	public Map<String,Map<String,Integer>> rangosEdadPorAlumnoImperativo(String rangoStr) {
+		Centro c = Centro.of();
+        Map<String,Map<String,Integer>> rangosEdadAlumnos = new HashMap<>();
+        String[] rangos = rangoStr.split(",");
 
-	public Map<String, String> rangosEdadPorAlumnoFuncional() {
-		return null;
-	}
+        for (String r : rangos) {
+            // r = r.replaceAll("\s+", "");
+            if (!r.matches("\\d+-\\d+")) {
+                throw new IllegalArgumentException("Formato incorrecto: " + r);
+            }
+
+            String[] valores = r.split("-");
+            Integer min = Integer.parseInt(valores[0].strip());
+            Integer max = Integer.parseInt(valores[1].strip());
+            Map<String,Integer> alumnoEdad = new HashMap<>();
+
+            for (Alumno a : c.alumnos().todos()) {
+                if (a.edad() >= min && a.edad() <= max) {
+                    alumnoEdad.put(a.nombre(), a.edad());
+                }
+            }
+            rangosEdadAlumnos.put(r,alumnoEdad);
+        }
+
+        return rangosEdadAlumnos;
+    }
+
+	public Map<String, Map<String, Integer>> rangosEdadPorAlumnoFuncional(String rangoStr) {
+		Centro c = Centro.of();
+        return Arrays.stream(rangoStr.split(",")) // Convierte la cadena de rangos en un stream de Strings, separando por comas
+            .peek(r -> {
+                // r = r.replaceAll("\s+", ""); // Quita espacios en blanco
+                if (!r.matches("\\d+-\\d+")) { // Verifica que el formato sea "número-número"
+                    throw new IllegalArgumentException("Formato incorrecto: " + r);
+                }
+            })
+            .collect(Collectors.toMap( // Convierte el rango "min-max" en un array de enteros [min, max]
+                r -> r,
+                r -> {
+                    String[] valores = r.split("-");
+                    int min = Integer.parseInt(valores[0].strip());
+                    int max = Integer.parseInt(valores[1].strip());
+                    return c.alumnos().todos().stream()
+                        .filter(a -> a.edad() >= min && a.edad() <= max)
+                        .collect(Collectors.toMap(
+                                Alumno::nombre, 
+                                Alumno::edad,
+                                (a,b)->a // Evita nombres duplicados
+                                ));
+                    }
+            ));
+    }
 
 	public String nombreProfesorMasGruposImperativo(Integer min, Integer max) {
 		Centro c = Centro.of();
@@ -230,10 +264,35 @@ public class PreguntasCentro {
 	}
 
 	public String nombreProfesorMasGruposFuncional(Integer min, Integer max) {
-		return null;
-	}
+		    if (min >= max) {
+		        throw new IllegalArgumentException("La edad mínima debe ser menor que la máxima");
+		    }
 
-	public List<String> nombresAlumnosMayorNotaImperativo(Integer n, LocalDate a) {
+		    Centro c = Centro.of();
+		    Profesores pr = c.profesores();
+		    Asignaciones as = c.asignaciones();
+
+		    // Obtenemos los dnis de los profesores en el rango de edad
+		    Set<String> dnisProfesoresFiltrados = pr.todos().stream()
+		        .filter(p -> p.edad() >= min && p.edad() <= max)
+		        .map(Profesor::dni)
+		        .collect(Collectors.toSet());
+
+		    // Contamos cuántas asignaciones tiene cada profesor filtrado
+		    Map<String, Long> conteo = as.todas().stream()
+		        .map(Asignacion::dni)
+		        .filter(dnisProfesoresFiltrados::contains)
+		        .collect(Collectors.groupingBy(dni -> dni, Collectors.counting()));
+
+		    // Buscamos el dni con más asignaciones
+		    return conteo.entrySet().stream()
+		        .max(Map.Entry.comparingByValue())
+		        .map(entry -> pr.profesor(entry.getKey()).nombreCompleto())
+		        .orElse(null);
+		}
+	
+
+	public List<String> nombresAlumnosMayorNotaImperativo(Integer n, LocalDateTime anio) {
 		Centro c = Centro.of();
 		Alumnos alums = c.alumnos();
 		ArrayList<String> AlumnosTop = new ArrayList<>();
@@ -242,7 +301,7 @@ public class PreguntasCentro {
 			throw new IllegalArgumentException("La nota de los alumnos no puede ser null");
 		}
 		for (Alumno alum : alums.todos()) {
-			if (alum.fechaDeNacimiento().toLocalDate().isAfter(a) && n < 10 && n > 1) {// pasamos la fecha de nacimiento
+			if (alum.fechaDeNacimiento().isAfter(anio) && n < 10 && n > 1) {// pasamos la fecha de nacimiento
 																						// a LocalDate y vemos si está
 																						// despues de la fecha "a" y
 																						// comporbamos q esta dentro del
@@ -255,7 +314,7 @@ public class PreguntasCentro {
 		return AlumnosTop;
 	}
 
-	public List<String> nombresAlumnosMayorNotaFuncional(Integer n, LocalDate a) {
+	public List<String> nombresAlumnosMayorNotaFuncional(Integer n, LocalDateTime anio) {
 		Centro c = Centro.of();
 		Alumnos alums = c.alumnos();
 		if (n == null) {
@@ -265,13 +324,34 @@ public class PreguntasCentro {
 			throw new IllegalArgumentException("La nota de los alumnos debe estar entre 2 y 9 ");
 		}
 
-		return alums.todos().stream().filter(alumno -> alumno.fechaDeNacimiento().toLocalDate().isAfter(a))
+		return alums.todos().stream().filter(alumno -> alumno.fechaDeNacimiento().isAfter(anio))
 				.filter(alumno -> alumno.nota() >= n).map(alumno -> alumno.nombre()).collect(Collectors.toList());
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		PreguntasCentro pc = new PreguntasCentro();
+
+        System.out.println(pc.promedioEdadProfesoresImperativo("72074089R"));
+        System.out.println(pc.promedioEdadProfesoresFuncional("72074089R"));
+
+        System.out.println(pc.grupoMayorDiversidadEdadImperativo());
+        System.out.println(pc.grupoMayorDiversidadEdadFuncional());
+
+        System.out.println(pc.alumnoMasMatriculasImperativo());
+        System.out.println(pc.alumnoMasMatriculasFuncional());
+
+        System.out.println(pc.rangosEdadPorAlumnoImperativo("20-23,24-26,26-28"));
+        System.out.println(pc.rangosEdadPorAlumnoFuncional("20-23,24-26,26-28"));
+
+        System.out.println(pc.nombreProfesorMasGruposImperativo(26,27));
+        System.out.println(pc.nombreProfesorMasGruposFuncional(26,27));
+
+        LocalDateTime anio = LocalDateTime.of(2003,1,1,0,0);
+        System.out.println(pc.nombresAlumnosMayorNotaImperativo(4, anio));
+        System.out.println(pc.nombresAlumnosMayorNotaFuncional(4, anio));
 
 	}
 
 }
+
+
