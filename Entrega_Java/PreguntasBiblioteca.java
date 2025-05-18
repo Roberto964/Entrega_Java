@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import us.lsi.bancos.Prestamo;
 import us.lsi.biblioteca.Libro;
 import us.lsi.biblioteca.Libros;
 import us.lsi.centro.Titulo;
@@ -20,8 +21,33 @@ import java.util.stream.Stream;
 
 public class PreguntasBiblioteca {
 	public Map<String, Integer> masVecesPrestadoImperativo() {
-		return null;
+		Map<String, Integer> conteoPrestamos = new HashMap<>();
+
+	    // Contar préstamos por ISBN
+	    for (Prestamo prestamo : prestamos.of().todos()) {
+	        conteoPrestamos.put(
+	            prestamo.isbn(),
+	            conteoPrestamos.getOrDefault(prestamo.isbn(), 0) + 1
+	        );
+	    }
+
+	    // Encontrar el ISBN con más préstamos
+	    String isbnMax = null;
+	    int maxVeces = 0;
+
+	    for (Map.Entry<String, Integer> entry : conteoPrestamos.entrySet()) {
+	        if (entry.getValue() > maxVeces) {
+	            isbnMax = entry.getKey();
+	            maxVeces = entry.getValue();
+	        }
+	    }
+
+	    if (isbnMax == null) return null; // No hay préstamos
+
+	    Libro libro = libros.libro(isbnMax);
+	    return new LibroPrestado(libro, maxVeces);
 	}
+	
 
 	public Map<String, Integer> masVecesPrestadoFuncional() {
 		return null;
